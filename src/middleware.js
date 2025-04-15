@@ -1,37 +1,35 @@
-import { withAuth } from "next-auth/middleware";
-import { NextResponse } from "next/server";
-
-export default withAuth(
-  function middleware(req) {
-    const token = req.nextauth.token;
-    const isAuth = !!token;
-    const isAuthPage = req.nextUrl.pathname.startsWith("/auth");
-
-    if (isAuthPage) {
-      if (isAuth) {
-        return NextResponse.redirect(new URL("/dashboard", req.url));
-      }
-      return null;
-    }
-
-    if (!isAuth) {
-      let from = req.nextUrl.pathname;
-      if (req.nextUrl.search) {
-        from += req.nextUrl.search;
-      }
-
-      return NextResponse.redirect(
-        new URL(`/auth/login?from=${encodeURIComponent(from)}`, req.url)
-      );
-    }
-  },
-  {
-    callbacks: {
-      authorized: ({ token }) => !!token,
-    },
-  }
-);
+import { NextRequest, NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
+export { default } from "next-auth/middleware";
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/auth/:path*"],
-}; 
+  matcher: [
+    "/dashboard/:path*",
+    "/login",
+    "/register",
+    "/",
+    "/verify/:path*",
+  ],
+};
+
+export async function middleware(request) {
+  const token = await getToken({ req: request });
+  const url = request.nextUrl;
+
+  if (
+    token &&
+    (url.pathname.startsWith("/login") ||
+      url.pathname.startsWith("/register") ||
+      url.pathname.startsWith("/verify")
+      )
+  ) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  if (!token && url.pathname.startsWith("/dashboard")) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  return NextResponse.next();
+}
+
