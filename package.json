@@ -9,8 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.0",
     "axios": "^1.8.4",
     "bcryptjs": "^3.0.2",
+    "langchain": "^0.3.21",
+    "lucide-react": "^0.488.0",
     "mongoose": "^8.13.2",
     "next": "15.3.0",
     "next-auth": "^4.24.11",
