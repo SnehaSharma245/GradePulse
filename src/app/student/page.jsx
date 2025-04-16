@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Brain, Clock, CheckCircle2, XCircle, BookOpen } from "lucide-react";
 
 const StudentPage = () => {
   const [syllabuses, setSyllabuses] = useState([]);
@@ -12,7 +14,7 @@ const StudentPage = () => {
   const [answers, setAnswers] = useState({});
   const [score, setScore] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [loadingType, setLoadingType] = useState(null); // Track which button is loading
+  const [loadingType, setLoadingType] = useState(null);
   const [error, setError] = useState(null);
   const [results, setResults] = useState(null);
 
@@ -21,7 +23,7 @@ const StudentPage = () => {
   }, []);
 
   useEffect(() => {
-    if (quiz && !results) {  // Only run timer if quiz is active and not submitted
+    if (quiz && !results) {
       const timer = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
@@ -34,7 +36,7 @@ const StudentPage = () => {
       }, 1000);
       return () => clearInterval(timer);
     }
-  }, [quiz, results]);  // Add results to dependency array
+  }, [quiz, results]);
 
   const fetchSyllabuses = async () => {
     try {
@@ -50,7 +52,7 @@ const StudentPage = () => {
   const generateQuiz = async (type, content) => {
     try {
       setLoading(true);
-      setLoadingType(type); // Set which button is loading
+      setLoadingType(type);
       setError(null);
       
       const response = await fetch("/api/quiz/generate", {
@@ -76,7 +78,7 @@ const StudentPage = () => {
       setError("Failed to generate quiz. Please try again.");
     } finally {
       setLoading(false);
-      setLoadingType(null); // Reset loading type
+      setLoadingType(null);
     }
   };
 
@@ -105,18 +107,37 @@ const StudentPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       <div className="max-w-5xl mx-auto p-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Student Dashboard</h1>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-8"
+        >
+          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 mb-2">
+            Student Dashboard
+          </h1>
+          <p className="text-xl text-gray-600">Test your knowledge with AI-powered quizzes</p>
+        </motion.div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-800 px-6 py-4 rounded-lg mb-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-red-50 border border-red-200 text-red-800 px-6 py-4 rounded-xl mb-6"
+          >
             {error}
-          </div>
+          </motion.div>
         )}
 
         {!quiz ? (
-          <div className="bg-white rounded-xl shadow-sm p-6 space-y-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="bg-white rounded-xl shadow-lg p-6 space-y-6"
+          >
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <select
                 className="w-full p-3 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
@@ -168,8 +189,10 @@ const StudentPage = () => {
 
             <div className="flex flex-wrap gap-4 pt-4">
               {selectedTopic && (
-                <button
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                   onClick={() =>
                     generateQuiz(
                       "topic",
@@ -190,14 +213,19 @@ const StudentPage = () => {
                       <span>Generating...</span>
                     </>
                   ) : (
-                    "Generate Quiz for Topic"
+                    <>
+                      <Brain className="h-5 w-5" />
+                      Generate Quiz for Topic
+                    </>
                   )}
-                </button>
+                </motion.button>
               )}
 
               {selectedChapter !== null && (
-                <button
-                  className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                   onClick={() =>
                     generateQuiz(
                       "chapter",
@@ -218,14 +246,19 @@ const StudentPage = () => {
                       <span>Generating...</span>
                     </>
                   ) : (
-                    "Generate Quiz for Chapter"
+                    <>
+                      <BookOpen className="h-5 w-5" />
+                      Generate Quiz for Chapter
+                    </>
                   )}
-                </button>
+                </motion.button>
               )}
 
               {selectedSyllabus && (
-                <button
-                  className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                   onClick={() =>
                     generateQuiz(
                       "syllabus",
@@ -243,17 +276,28 @@ const StudentPage = () => {
                       <span>Generating...</span>
                     </>
                   ) : (
-                    "Generate Quiz for Complete Syllabus"
+                    <>
+                      <Brain className="h-5 w-5" />
+                      Generate Quiz for Complete Syllabus
+                    </>
                   )}
-                </button>
+                </motion.button>
               )}
             </div>
-          </div>
+          </motion.div>
         ) : (
-          <div className="bg-white rounded-xl shadow-sm p-6 space-y-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="bg-white rounded-xl shadow-lg p-6 space-y-6"
+          >
             <div className="flex justify-between items-center pb-4 border-b border-gray-100">
-              <h2 className="text-2xl font-bold text-gray-800">Quiz</h2>
-              <div className="text-lg font-semibold px-4 py-2 bg-blue-50 text-blue-700 rounded-lg">
+              <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
+                Quiz
+              </h2>
+              <div className="flex items-center gap-2 text-lg font-semibold px-4 py-2 bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 rounded-lg">
+                <Clock className="h-5 w-5" />
                 Time Remaining: {formatTime(timeLeft)}
               </div>
             </div>
@@ -261,7 +305,13 @@ const StudentPage = () => {
             {!results ? (
               <div className="space-y-6">
                 {quiz.map((question, index) => (
-                  <div key={index} className="bg-gray-50 rounded-xl p-6">
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    className="bg-gray-50 rounded-xl p-6"
+                  >
                     <p className="text-lg font-semibold text-gray-800 mb-4">
                       {index + 1}. {question.question}
                     </p>
@@ -289,28 +339,39 @@ const StudentPage = () => {
                         </label>
                       ))}
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
 
-                <button
-                  className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-lg font-semibold"
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all text-lg font-semibold"
                   onClick={submitQuiz}
                 >
                   Submit Quiz
-                </button>
+                </motion.button>
               </div>
             ) : (
               <div className="space-y-6">
-                <div className="bg-blue-50 rounded-xl p-6 border border-blue-100">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Quiz Results</h3>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-100"
+                >
+                  <h3 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 mb-2">
+                    Quiz Results
+                  </h3>
                   <p className="text-lg text-gray-900">
                     Your Score: <span className="font-semibold">{score} out of {quiz.length}</span> ({((score / quiz.length) * 100).toFixed(1)}%)
                   </p>
-                </div>
+                </motion.div>
 
                 {results.map((result, index) => (
-                  <div
+                  <motion.div
                     key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
                     className={`rounded-xl p-6 ${
                       result.isCorrect ? "bg-green-50" : "bg-red-50"
                     }`}
@@ -335,16 +396,21 @@ const StudentPage = () => {
                       ))}
                     </div>
                     <div className="mt-4 space-y-2">
-                      <p className="font-semibold text-gray-900">
+                      <p className="font-semibold text-gray-900 flex items-center gap-2">
                         Your Answer:{" "}
                         <span
                           className={
                             result.isCorrect 
-                              ? "text-green-800 font-bold"
-                              : "text-red-800 font-bold"
+                              ? "text-green-800 font-bold flex items-center gap-1"
+                              : "text-red-800 font-bold flex items-center gap-1"
                           }
                         >
                           {result.yourAnswer}
+                          {result.isCorrect ? (
+                            <CheckCircle2 className="h-5 w-5 text-green-600" />
+                          ) : (
+                            <XCircle className="h-5 w-5 text-red-600" />
+                          )}
                         </span>
                       </p>
                       {!result.isCorrect && (
@@ -356,11 +422,13 @@ const StudentPage = () => {
                         </p>
                       )}
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
 
-                <button
-                  className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-lg font-semibold"
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all text-lg font-semibold"
                   onClick={() => {
                     setQuiz(null);
                     setResults(null);
@@ -369,10 +437,10 @@ const StudentPage = () => {
                   }}
                 >
                   Take Another Quiz
-                </button>
+                </motion.button>
               </div>
             )}
-          </div>
+          </motion.div>
         )}
       </div>
     </div>
