@@ -61,25 +61,8 @@ function TeacherDashboard() {
             <p className="text-xl text-gray-600">Manage your courses and students</p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="p-6 rounded-xl bg-white shadow-lg hover:shadow-xl transition-shadow card-hover"
-            >
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                <Brain className="h-6 w-6 text-blue-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">AI Quiz Generator</h3>
-              <p className="text-gray-600 mb-4">Generate AI-powered quizzes for your students</p>
-              <button
-                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all"
-                onClick={() => router.push('/quiz/generator')}
-              >
-                Generate Quiz
-              </button>
-            </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-8">
+
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
