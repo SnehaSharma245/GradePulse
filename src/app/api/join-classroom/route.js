@@ -9,7 +9,6 @@ export async function POST(req) {
   try {
     await dbConnect();
     const session = await getServerSession(authOptions);
-    console.log(session);
     const user = session?.user;
     if (!user)
       return NextResponse.json(
@@ -17,12 +16,24 @@ export async function POST(req) {
         { status: 401 }
       );
 
-    const existingUser = await Student.findById(user.id);
+    const student = await Student.findOne({ userId: user.id });
+    console.log("student: ", student);
+    if (!student) {
+      return NextResponse.json(
+        { success: false, message: "Student not found" },
+        { status: 404 }
+      );
+    }
     const { classroomCode } = await req.json();
-    const joinedClassroom = await Classroom.updateOne(
+    console.log(classroomCode);
+
+    const joinedClassroom = await Classroom.findOneAndUpdate(
       { classroomCode },
-      { $push: { students: user.id } }
+      { $push: { students: student._id } },
+      { new: true } // Returns the updated document
     );
+
+    console.log("joinedClassroom ", joinedClassroom);
 
     if (!joinedClassroom) {
       return NextResponse.json(
@@ -32,7 +43,7 @@ export async function POST(req) {
     }
 
     const updatedUser = await Student.updateOne(
-      { _id: user.id },
+      { _id: student._id },
       { $push: { classrooms: joinedClassroom._id } }
     );
 
@@ -44,7 +55,11 @@ export async function POST(req) {
     }
 
     return NextResponse.json(
-      { success: true, message: "Classroom created successfully" },
+      {
+        success: true,
+        message: "Classroom created successfully",
+        joinedClassroom,
+      },
       { status: 201 }
     );
   } catch (error) {
