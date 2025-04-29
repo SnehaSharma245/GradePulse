@@ -1,13 +1,24 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import axios from "axios";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 function StudentDashboard() {
   const [classroomCode, setClassroomCode] = useState("");
+  const { data: session } = useSession();
+  const user = session?.user;
+  const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
 
   const handleInputChange = (e) => {
     setClassroomCode(e.target.value);
@@ -20,24 +31,62 @@ function StudentDashboard() {
         classroomCode,
       });
       console.log(result);
-      if (result?.success) {
+      if (result?.data?.success) {
         toast.success(result.data.message);
         setClassroomCode("");
+        setIsJoinModalOpen(false);
       }
     } catch (error) {
-      toast.error(error?.result?.data?.message || "Failed to join classroom");
+      toast.error(error?.response?.data?.message || "Failed to join classroom");
     }
   };
 
+  const openJoinModal = () => setIsJoinModalOpen(true);
+  const closeJoinModal = () => setIsJoinModalOpen(false);
+
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <Card className="w-full max-w-md p-6 shadow-xl rounded-2xl">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 space-y-8">
+      {/* Join Classroom Card */}
+      <Card className="w-full max-w-sm p-6 shadow-lg rounded-2xl">
         <CardHeader>
-          <CardTitle className="text-2xl font-semibold">
+          <CardTitle className="text-xl font-semibold">
             Join Classroom
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="text-center">
+          <Button
+            onClick={openJoinModal}
+            className="bg-blue-600 hover:bg-blue-700 w-full"
+          >
+            Open Join Classroom
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Show Classrooms Card */}
+      <Card className="w-full max-w-sm p-6 shadow-lg rounded-2xl">
+        <CardHeader>
+          <CardTitle className="text-xl font-semibold">
+            Show Classrooms
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="text-center">
+          <Link href="/student-classrooms">
+            <Button className="bg-green-600 hover:bg-green-700 w-full">
+              View Classrooms
+            </Button>
+          </Link>
+        </CardContent>
+      </Card>
+
+      {/* Join Classroom Modal */}
+      <Dialog open={isJoinModalOpen} onOpenChange={closeJoinModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold">
+              Join a Classroom
+            </DialogTitle>
+          </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label
@@ -57,16 +106,15 @@ function StudentDashboard() {
                 required
               />
             </div>
-
             <Button
               type="submit"
-              className="w-full mt-4 bg-green-600 hover:bg-green-700"
+              className="w-full mt-4 bg-blue-600 hover:bg-blue-700"
             >
               Join Classroom
             </Button>
           </form>
-        </CardContent>
-      </Card>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
