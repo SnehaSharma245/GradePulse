@@ -18,6 +18,10 @@ const teacherSchema = new Schema({
     unique: true,
     trim: true,
   },
+  classrooms: {
+    type: [Schema.Types.ObjectId],
+    ref: "Classroom",
+  },
 });
 
 const Teacher =

@@ -18,7 +18,7 @@ const studentSchema = new Schema({
     unique: true,
     trim: true,
   },
-  classroom: {
+  classrooms: {
     type: [Schema.Types.ObjectId],
     ref: "Classroom",
     trim: true,
