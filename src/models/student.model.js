@@ -8,6 +8,10 @@ const studentSchema = new Schema({
     required: true,
     trim: true,
   },
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+  },
   studentEmail: {
     type: String,
     required: true,
@@ -17,7 +21,6 @@ const studentSchema = new Schema({
   classroom: {
     type: [Schema.Types.ObjectId],
     ref: "Classroom",
-    required: true,
     trim: true,
   },
 });
