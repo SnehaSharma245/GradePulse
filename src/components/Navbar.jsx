@@ -1,36 +1,41 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Menu, X } from 'lucide-react';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Menu, X } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { data: session } = useSession(); // Get user session data
+  const user = session?.user;
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const handleSignOut = async () => {
+    await signOut({ redirect: true, callbackUrl: "/login" });
+  };
+
   const navLinks = [
-    { name: 'Features', href: '#features' },
-    { name: 'How It Works', href: '#how-it-works' },
-    { name: 'Pricing', href: '#pricing' },
-    { name: 'Contact', href: '#contact' },
+    { name: "Features", href: "#features" },
+    { name: "How It Works", href: "#how-it-works" },
+    { name: "Pricing", href: "#pricing" },
+    { name: "Contact", href: "#contact" },
   ];
 
   return (
     <nav
       className={`fixed w-full z-50 transition-all duration-300 ${
-        isScrolled
-          ? 'bg-white/90 backdrop-blur-md shadow-sm'
-          : 'bg-transparent'
+        isScrolled ? "bg-white/90 backdrop-blur-md shadow-sm" : "bg-transparent"
       }`}
     >
       <div className="container mx-auto px-4">
@@ -51,12 +56,23 @@ export default function Navbar() {
               </Link>
             ))}
             <div className="flex items-center space-x-4">
-              <Button variant="outline" className="button-hover">
-                Login
-              </Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 button-hover">
-                Get Started
-              </Button>
+              {user ? (
+                <Button
+                  onClick={handleSignOut}
+                  className="bg-red-600 hover:bg-red-700 button-hover"
+                >
+                  Sign Out
+                </Button>
+              ) : (
+                <>
+                  <Button variant="outline" className="button-hover">
+                    Login
+                  </Button>
+                  <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 button-hover">
+                    Get Started
+                  </Button>
+                </>
+              )}
             </div>
           </div>
 
@@ -88,12 +104,23 @@ export default function Navbar() {
                 </Link>
               ))}
               <div className="flex flex-col space-y-2 pt-4 border-t">
-                <Button variant="outline" className="w-full button-hover">
-                  Login
-                </Button>
-                <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 button-hover">
-                  Get Started
-                </Button>
+                {user ? (
+                  <Button
+                    onClick={() => signOut()}
+                    className="w-full bg-red-600 hover:bg-red-700 button-hover"
+                  >
+                    Sign Out
+                  </Button>
+                ) : (
+                  <>
+                    <Button variant="outline" className="w-full button-hover">
+                      Login
+                    </Button>
+                    <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 button-hover">
+                      Get Started
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </div>
