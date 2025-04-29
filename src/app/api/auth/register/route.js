@@ -38,25 +38,31 @@ export async function POST(req) {
       verifyCodeExpiry: otpExpiry,
     });
 
-    if(role == "student"){
+    if (role == "student") {
       await Student.create({
-        studentName : name,
-        studentEmail : email,
-      })
+        studentName: name,
+        studentEmail: email,
+        userId: user._id,
+        classrooms: [],
+      });
     }
 
-    if(role == "teacher"){
+    if (role == "teacher") {
       await Teacher.create({
         teacherName: name,
-        teacherEmail: email
-      })
+        teacherEmail: email,
+        userId: user._id,
+      });
     }
 
     // Send verification email
     await sendVerificationMail(email, otp);
 
     return NextResponse.json(
-      { message: "User registered successfully. Please check your email for verification." },
+      {
+        message:
+          "User registered successfully. Please check your email for verification.",
+      },
       { status: 201 }
     );
   } catch (error) {
@@ -66,4 +72,4 @@ export async function POST(req) {
       { status: 500 }
     );
   }
-} 
+}
