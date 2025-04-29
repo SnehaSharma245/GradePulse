@@ -3,6 +3,8 @@ import { hash } from "bcryptjs";
 import User from "@/models/user.model";
 import dbConnect from "@/lib/dbConnect";
 import sendVerificationMail from "@/utils/sendVerificationMail";
+import Student from "@/models/student.model";
+import Teacher from "@/models/teacher.model";
 
 export async function POST(req) {
   try {
@@ -35,6 +37,20 @@ export async function POST(req) {
       verifyCode: otp,
       verifyCodeExpiry: otpExpiry,
     });
+
+    if(role == "student"){
+      await Student.create({
+        studentName : name,
+        studentEmail : email,
+      })
+    }
+
+    if(role == "teacher"){
+      await Teacher.create({
+        teacherName: name,
+        teacherEmail: email
+      })
+    }
 
     // Send verification email
     await sendVerificationMail(email, otp);
