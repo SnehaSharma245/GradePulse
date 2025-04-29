@@ -14,11 +14,7 @@ const studentSchema = new Schema({
         unique: true,
         trim: true,
     },  
-    institute: {
-        type: Schema.Types.ObjectId,
-        ref: "Institute",
-        required: true,
-    },
+
 
 });
 

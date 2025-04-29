@@ -24,7 +24,7 @@ const userSchema = new Schema(
     },
     role: {
       type: String,
-      enum: ["student", "teacher", "institute"],
+      enum: ["student", "teacher"],
       required: true,
     },
     isVerified: {
