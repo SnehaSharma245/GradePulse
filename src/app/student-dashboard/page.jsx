@@ -30,7 +30,7 @@ function StudentDashboard() {
       const result = await axios.post("/api/join-classroom", {
         classroomCode,
       });
-      console.log(result);
+
       if (result?.data?.success) {
         toast.success(result.data.message);
         setClassroomCode("");

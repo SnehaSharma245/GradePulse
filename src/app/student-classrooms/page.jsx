@@ -11,7 +11,6 @@ function ShowClassrooms() {
   const fetchClassrooms = async () => {
     try {
       const result = await axios.post("/api/show-classrooms");
-      console.log("API Response:", result?.data);
 
       if (result?.data?.success) {
         setClassrooms(result?.data?.classrooms);

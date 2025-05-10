@@ -12,6 +12,7 @@ export async function POST(req) {
     await dbConnect();
     const session = await getServerSession(authOptions);
     const user = session?.user;
+
     if (!user)
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
@@ -65,7 +66,7 @@ export async function POST(req) {
           { status: 404 }
         );
       }
-      console.log("Classrooms:", classrooms);
+
       return NextResponse.json(
         {
           success: true,
