@@ -8,7 +8,7 @@ export async function POST(req) {
   try {
     await dbConnect();
     const session = await getServerSession(authOptions);
-    console.log(session);
+
     const user = session?.user;
     if (!user)
       return NextResponse.json(
