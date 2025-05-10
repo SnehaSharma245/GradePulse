@@ -40,7 +40,10 @@ export default function Navbar() {
     >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="text-2xl font-bold gradient-text">
+          <Link
+            href="/"
+            className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
+          >
             GradePulse
           </Link>
 
@@ -59,18 +62,25 @@ export default function Navbar() {
               {user ? (
                 <Button
                   onClick={handleSignOut}
-                  className="bg-red-600 hover:bg-red-700 button-hover"
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 button-hover"
                 >
                   Sign Out
                 </Button>
               ) : (
                 <>
-                  <Button variant="outline" className="button-hover">
+                  <Link
+                    href="/login"
+                    variant="outline"
+                    className="button-hover p-1 px-4 border rounded-lg bg-white hover:bg-gray-100 text-gray-600"
+                  >
                     Login
-                  </Button>
-                  <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 button-hover">
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="bg-gradient-to-r p-1 px-2 border rounded-lg text-white from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 button-hover"
+                  >
                     Get Started
-                  </Button>
+                  </Link>
                 </>
               )}
             </div>
