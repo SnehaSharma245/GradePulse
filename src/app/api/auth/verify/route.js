@@ -6,23 +6,14 @@ export async function POST(req) {
   try {
     const { email, otp } = await req.json();
     await dbConnect();
-    console.log(email, otp);
-    
-    
 
-    const user = await User.findOne({ email : email });
-    console.log(user);
-
+    const user = await User.findOne({ email: email });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     if (user.isVerified) {
-      console.log("User already verified");
       return NextResponse.json(
         { error: "User already verified" },
         { status: 400 }
@@ -30,19 +21,11 @@ export async function POST(req) {
     }
 
     if (user.verifyCode !== otp) {
-      console.log("Invalid OTP");
-      return NextResponse.json(
-        { error: "Invalid OTP" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid OTP" }, { status: 400 });
     }
 
     if (user.verifyCodeExpiry < new Date()) {
-      console.log("OTP expired");
-      return NextResponse.json(
-        { error: "OTP expired" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "OTP expired" }, { status: 400 });
     }
 
     // Update user verification status
@@ -60,4 +43,4 @@ export async function POST(req) {
       { status: 500 }
     );
   }
-} 
+}
