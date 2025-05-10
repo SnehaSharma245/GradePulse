@@ -17,7 +17,7 @@ export async function POST(req) {
       );
 
     const student = await Student.findOne({ userId: user.id });
-    console.log("student: ", student);
+
     if (!student) {
       return NextResponse.json(
         { success: false, message: "Student not found" },
@@ -25,15 +25,12 @@ export async function POST(req) {
       );
     }
     const { classroomCode } = await req.json();
-    console.log(classroomCode);
 
     const joinedClassroom = await Classroom.findOneAndUpdate(
       { classroomCode },
       { $push: { students: student._id } },
       { new: true } // Returns the updated document
     );
-
-    console.log("joinedClassroom ", joinedClassroom);
 
     if (!joinedClassroom) {
       return NextResponse.json(
