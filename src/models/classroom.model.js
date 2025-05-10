@@ -14,6 +14,11 @@ const classroomSchema = new Schema({
     required: true,
     trim: true,
   },
+  syllabusId: {
+    type: Schema.Types.ObjectId,
+    ref: "Syllabus",
+    trim: true,
+  },
   classroomCode: {
     type: String,
     trim: true,
