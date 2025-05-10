@@ -2,14 +2,42 @@ import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import Syllabus from "@/models/syllabus.model";
 import dbConnect from "@/lib/dbConnect";
+import Classroom from "@/models/classroom.model";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/options";
 
 export async function POST(req) {
   try {
     // Connect to MongoDB
     await dbConnect();
 
+    const session = await getServerSession(authOptions);
+
+    const user = session?.user;
     const formData = await req.formData();
+
     const file = formData.get("pdf");
+
+    const url = new URL(req.url);
+    const classroomCode =
+      formData.get("classroomCode") || url.searchParams.get("classroomCode");
+
+    if (!classroomCode) {
+      return NextResponse.json(
+        { success: false, message: "Classroom code is required" },
+        { status: 400 }
+      );
+    }
+    if (!user)
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+
+    const classroom = await Classroom.findOne({
+      classroomCode: classroomCode,
+      teacher: user.id,
+    });
 
     if (!file) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
@@ -64,33 +92,36 @@ Important rules:
 
     const response = await result.response;
     let text = response.text().trim();
-    
+
     // Clean up the response string
-    text = text.replace(/^```json\s*|\s*```$/g, ''); // Remove markdown code block markers
-    text = text.replace(/^["']|["']$/g, ''); // Remove surrounding quotes if any
+    text = text.replace(/^```json\s*|\s*```$/g, ""); // Remove markdown code block markers
+    text = text.replace(/^["']|["']$/g, ""); // Remove surrounding quotes if any
     text = text.replace(/\\"/g, '"'); // Replace escaped quotes with regular quotes
     text = text.trim(); // Remove any extra whitespace
-    
-    console.log("Cleaned text:", text);
 
     // Parse the JSON response
     const syllabusData = JSON.parse(text);
-    console.log("Syllabus data:", syllabusData);
 
     // Process topics to ensure they are clean and properly formatted
-    syllabusData.chapters = syllabusData.chapters.map(chapter => ({
+    syllabusData.chapters = syllabusData.chapters.map((chapter) => ({
       ...chapter,
-      topics: chapter.topics.map(topic => 
-        topic.trim()
-          .replace(/^\d+\.\s*/, '') // Remove leading numbers
-          .replace(/^[-•]\s*/, '') // Remove leading bullets
+      topics: chapter.topics.map((topic) =>
+        topic
           .trim()
-      ) // Remove empty topics
+          .replace(/^\d+\.\s*/, "") // Remove leading numbers
+          .replace(/^[-•]\s*/, "") // Remove leading bullets
+          .trim()
+      ), // Remove empty topics
     }));
 
     // Create syllabus document
     const syllabus = new Syllabus(syllabusData);
     await syllabus.save();
+
+    // Update classroom with syllabus ID
+    await Classroom.findByIdAndUpdate(classroom._id, {
+      syllabusId: syllabus._id,
+    });
 
     return NextResponse.json(syllabusData);
   } catch (error) {
