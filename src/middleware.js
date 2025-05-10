@@ -3,7 +3,15 @@ import { getToken } from "next-auth/jwt";
 export { default } from "next-auth/middleware";
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/login", "/register", "/", "/verify/:path*"],
+  matcher: [
+    "/dashboard/:path*",
+    "/login",
+    "/register",
+    "/",
+    "/verify/:path*",
+    "/teacher/:path*",
+    "/student-dashboard/",
+  ],
 };
 
 export async function middleware(request) {
@@ -11,11 +19,16 @@ export async function middleware(request) {
   const url = request.nextUrl;
   const role = token?.role;
 
-  if (
-    role === "admin" ||
-    (role === "student" && url.pathname.startsWith("/teacher-dashboard"))
-  ) {
+  if (role === "student" && url.pathname.startsWith("/teacher")) {
     return NextResponse.redirect(new URL("/invalid-access", request.url));
+  }
+
+  if (role === "teacher" && url.pathname.startsWith("/student-dashboard")) {
+    return NextResponse.redirect(new URL("/invalid-access", request.url));
+  }
+
+  if (token && role === "teacher" && url.pathname.startsWith("/dashboard")) {
+    return NextResponse.redirect(new URL("/teacher", request.url));
   }
 
   if (
@@ -27,7 +40,12 @@ export async function middleware(request) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  if (!token && url.pathname.startsWith("/dashboard")) {
+  if (
+    (!token &&
+      (url.pathname.startsWith("/dashboard") ||
+        url.pathname.startsWith("/teacher"))) ||
+    url.pathname.startsWith("/student-dashboard")
+  ) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
