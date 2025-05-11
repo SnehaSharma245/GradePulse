@@ -5,12 +5,28 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
+import { usePathname } from "next/navigation";
+import Loading from "./LoadingScreen";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { data: session } = useSession(); // Get user session data
   const user = session?.user;
+  const [loading, setLoading] = useState(false);
+  const pathname = usePathname();
+  const handleNavigation = (route) => {
+    if (route === pathname) {
+      return;
+    }
+    setLoading(true);
+  };
+
+  useEffect(() => {
+    return () => {
+      setLoading(false);
+    };
+  }, [pathname]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -32,6 +48,10 @@ export default function Navbar() {
     { name: "Contact", href: "#contact" },
   ];
 
+  if (loading) {
+    return <Loading />;
+  }
+
   return (
     <nav
       className={`fixed w-full z-50 transition-all duration-300 ${
@@ -42,6 +62,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           <Link
             href="/"
+            onClick={() => handleNavigation("/")}
             className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
           >
             GradePulse
@@ -71,12 +92,14 @@ export default function Navbar() {
                   <Link
                     href="/login"
                     variant="outline"
+                    onClick={() => handleNavigation("/login")}
                     className="button-hover p-1 px-4 border rounded-lg bg-white hover:bg-gray-100 text-gray-600"
                   >
                     Login
                   </Link>
                   <Link
                     href="/register"
+                    onClick={() => handleNavigation("/register")}
                     className="bg-gradient-to-r p-1 px-2 border rounded-lg text-white from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 button-hover"
                   >
                     Get Started
@@ -117,18 +140,26 @@ export default function Navbar() {
                 {user ? (
                   <Button
                     onClick={() => signOut()}
-                    className="w-full bg-red-600 hover:bg-red-700 button-hover"
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded transition-all duration-200"
                   >
                     Sign Out
                   </Button>
                 ) : (
                   <>
-                    <Button variant="outline" className="w-full button-hover">
+                    <Link
+                      href={"/login"}
+                      onClick={() => handleNavigation("/login")}
+                      className="w-full border-2  text-purple-600  hover:bg-gray-200 font-semibold py-2 px-4 rounded transition-all duration-200"
+                    >
                       Login
-                    </Button>
-                    <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 button-hover">
+                    </Link>
+                    <Link
+                      href={"/register"}
+                      onClick={() => handleNavigation("/register")}
+                      className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-2 px-4 rounded transition-all duration-200"
+                    >
                       Get Started
-                    </Button>
+                    </Link>
                   </>
                 )}
               </div>
