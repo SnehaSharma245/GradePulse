@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   Upload,
@@ -24,22 +24,45 @@ import { toast } from "sonner";
 import { Dialog, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import Link from "next/link";
 import axios from "axios";
+import { useSession } from "next-auth/react";
+import Loading from "@/components/LoadingScreen";
 
 function TeacherDashboard() {
   const [classroomName, setClassroomName] = useState("");
   const [classroomCode, setClassroomCode] = useState(null);
+  const [generateCodeLoading, setGenerateCodeLoading] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [classroomsLoading, setClassroomsLoading] = useState(false);
 
+  const { data: session } = useSession();
+  const user = session?.user;
   const router = useRouter();
+  const pathname = usePathname();
+  const handleNavigation = (route) => {
+    if (route === pathname) {
+      return;
+    }
+    setClassroomsLoading(true);
+  };
+
+  useEffect(() => {
+    return () => {
+      setClassroomsLoading(false);
+    };
+  }, [pathname]);
 
   const generateClassroomCode = async () => {
+    setGenerateCodeLoading(true);
     try {
       const result = await axios.get("/api/generate-classroom-code");
 
       setClassroomCode(result.data.classroomCode);
+      setGenerateCodeLoading(false);
       toast.success("Classroom code generated!");
     } catch (error) {
       toast.error(error?.response?.data?.message || "Failed to generate code");
+    } finally {
+      setGenerateCodeLoading(false);
     }
   };
   const handleCreateClassroom = async (e) => {
@@ -77,6 +100,10 @@ function TeacherDashboard() {
 
   const openCreateModal = () => setIsCreateModalOpen(true);
   const closeCreateModal = () => setIsCreateModalOpen(false);
+
+  if (!user) {
+    return <Loading />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
@@ -175,9 +202,40 @@ function TeacherDashboard() {
               </div>
               <h3 className="text-xl font-semibold mb-2">View Classrooms</h3>
               <p className="text-gray-600 mb-4">View all the classrooms</p>
-              <Link href="/teacher/teacher-classroom">
+              <Link
+                href="/teacher/teacher-classroom"
+                onClick={() => handleNavigation("/teacher/teacher-classroom")}
+              >
                 <button className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all">
-                  Go to Classrooms Page
+                  {classroomsLoading ? (
+                    <div className="flex items-center space-x-2 cursor-not-allowed">
+                      <svg
+                        className="animate-spin h-6 w-6 text-purple-200"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M12 2a10 10 0 0 1 10 10H12V2z"
+                        />
+                      </svg>
+                      <span className="text-purple-100 font-semibold">
+                        Loading...
+                      </span>
+                    </div>
+                  ) : (
+                    "View Classrooms"
+                  )}
                 </button>
               </Link>
             </motion.div>
@@ -237,7 +295,36 @@ function TeacherDashboard() {
                         onClick={generateClassroomCode}
                         className="w-full bg-gray-200 text-gray-700 hover:bg-gray-300 py-2 rounded-lg"
                       >
-                        Generate Classroom Code
+                        {generateCodeLoading ? (
+                          <span className="flex items-center justify-center text-white">
+                            <svg
+                              className="animate-spin h-5 w-5 mr-2"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              />
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 0 1 16 0A8 8 0 0 1 4 12z"
+                              />
+                            </svg>
+                            Generating...
+                          </span>
+                        ) : (
+                          <span className="flex items-center justify-center text-white">
+                            <Clipboard size={16} className="mr-2" />
+                            Generate Code
+                          </span>
+                        )}
                       </Button>
 
                       {classroomCode && (
