@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Mail, Lock } from "lucide-react";
+import Loading from "@/components/LoadingScreen";
+import { usePathname } from "next/navigation";
 
 export default function Login() {
   const router = useRouter();
@@ -16,6 +18,20 @@ export default function Login() {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [homeLoading, setHomeLoading] = useState(false);
+  const pathname = usePathname();
+  const handleNavigation = (route) => {
+    if (route === pathname) {
+      // Same route, no loading screen
+      return;
+    }
+    setHomeLoading(true);
+  };
+  useEffect(() => {
+    return () => {
+      setHomeLoading(false);
+    };
+  }, [pathname]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,6 +59,10 @@ export default function Login() {
     }
   };
 
+  if (homeLoading) {
+    return <Loading />;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -56,7 +76,17 @@ export default function Login() {
             <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 mb-2">
               Welcome Back
             </h1>
-            <p className="text-gray-600">Sign in to your GradePulse account</p>
+            <p className="text-gray-600">
+              Sign in to your{" "}
+              <Link
+                href={"/"}
+                onClick={() => handleNavigation("/")}
+                className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600"
+              >
+                GradePulse
+              </Link>{" "}
+              account
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">

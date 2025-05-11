@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, User, Mail, Lock, Building2 } from "lucide-react";
+import Loading from "@/components/LoadingScreen";
 
 export default function Register() {
   const router = useRouter();
@@ -18,6 +19,20 @@ export default function Register() {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [homeLoading, setHomeLoading] = useState(false);
+  const pathname = usePathname();
+  const handleNavigation = (route) => {
+    if (route === pathname) {
+      // Same route, no loading screen
+      return;
+    }
+    setHomeLoading(true);
+  };
+  useEffect(() => {
+    return () => {
+      setHomeLoading(false);
+    };
+  }, [pathname]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,6 +61,10 @@ export default function Register() {
     }
   };
 
+  if (homeLoading) {
+    return <Loading />;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -59,12 +78,25 @@ export default function Register() {
             <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 mb-2">
               Create Your Account
             </h1>
-            <p className="text-gray-600">Join GradePulse and transform education</p>
+            <p className="text-gray-600">
+              Join{" "}
+              <Link
+                href={"/"}
+                onClick={() => handleNavigation("/")}
+                className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600"
+              >
+                GradePulse
+              </Link>{" "}
+              and transform education
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <label htmlFor="name" className="text-sm font-medium text-gray-700">
+              <label
+                htmlFor="name"
+                className="text-sm font-medium text-gray-700"
+              >
                 Full Name
               </label>
               <div className="relative">
@@ -77,7 +109,9 @@ export default function Register() {
                   type="text"
                   required
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   placeholder="Enter your full name"
                 />
@@ -85,7 +119,10 @@ export default function Register() {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="text-sm font-medium text-gray-700"
+              >
                 Email Address
               </label>
               <div className="relative">
@@ -99,7 +136,9 @@ export default function Register() {
                   autoComplete="email"
                   required
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   placeholder="Enter your email"
                 />
@@ -107,7 +146,10 @@ export default function Register() {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="username" className="text-sm font-medium text-gray-700">
+              <label
+                htmlFor="username"
+                className="text-sm font-medium text-gray-700"
+              >
                 Username
               </label>
               <div className="relative">
@@ -120,7 +162,9 @@ export default function Register() {
                   type="text"
                   required
                   value={formData.username}
-                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, username: e.target.value })
+                  }
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   placeholder="Choose a username"
                 />
@@ -128,7 +172,10 @@ export default function Register() {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium text-gray-700">
+              <label
+                htmlFor="password"
+                className="text-sm font-medium text-gray-700"
+              >
                 Password
               </label>
               <div className="relative">
@@ -142,7 +189,9 @@ export default function Register() {
                   autoComplete="new-password"
                   required
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   placeholder="Create a password"
                 />
@@ -150,7 +199,10 @@ export default function Register() {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="role" className="text-sm font-medium text-gray-700">
+              <label
+                htmlFor="role"
+                className="text-sm font-medium text-gray-700"
+              >
                 Role
               </label>
               <div className="relative">
@@ -162,7 +214,9 @@ export default function Register() {
                   name="role"
                   required
                   value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, role: e.target.value })
+                  }
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 >
                   <option value="student">Student</option>
@@ -213,4 +267,4 @@ export default function Register() {
       </div>
     </div>
   );
-} 
+}
