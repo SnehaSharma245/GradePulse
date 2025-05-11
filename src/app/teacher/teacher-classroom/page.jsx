@@ -5,11 +5,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
+import { usePathname } from "next/navigation";
 
 function ShowClassrooms() {
   const [classrooms, setClassrooms] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showSyllabus, setShowSyllabus] = useState(false);
+
+  const [loadingClassroom, setLoadingClassroom] = useState(false);
+  const pathname = usePathname();
+  const handleNavigation = (route) => {
+    if (route === pathname) {
+      return;
+    }
+    setLoadingClassroom(true);
+  };
+
+  useEffect(() => {
+    return () => {
+      setLoadingClassroom(false);
+    };
+  }, [pathname]);
 
   const fetchClassrooms = async () => {
     try {
@@ -17,9 +32,6 @@ function ShowClassrooms() {
 
       if (result?.data?.success) {
         setClassrooms(result?.data?.classrooms);
-        toast.success(
-          result?.data?.message || "Classrooms fetched successfully"
-        );
       } else {
         toast.error(result?.data?.message || "Failed to fetch classrooms");
       }
@@ -66,9 +78,42 @@ function ShowClassrooms() {
                 </p>
                 <Link
                   href={`/teacher/classroom/?classroomCode=${classroom.classroomCode}`}
+                  onClick={() =>
+                    handleNavigation(
+                      `/teacher/classroom/?classroomCode=${classroom.classroomCode}`
+                    )
+                  }
                 >
-                  <Button className="mt-4 bg-purple-600 text-white hover:bg-purple-700 transition-colors">
-                    Show Classroom
+                  <Button className="mt-4 bg-purple-600 text-white hover:bg-purple-700 transition-colors disabled:cursor-not-allowed">
+                    {loadingClassroom ? (
+                      <div className="flex items-center space-x-2 cursor-not-allowed">
+                        <svg
+                          className="animate-spin h-6 w-6 text-purple-200"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M12 2a10 10 0 0 1 10 10H12V2z"
+                          />
+                        </svg>
+                        <span className="text-purple-100 font-semibold">
+                          Loading...
+                        </span>
+                      </div>
+                    ) : (
+                      "Show Classroom"
+                    )}
                   </Button>
                 </Link>
               </CardContent>
