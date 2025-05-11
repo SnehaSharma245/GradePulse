@@ -27,6 +27,7 @@ function ClassroomPage() {
   const [uploading, setUploading] = useState(false);
   const [syllabus, setSyllabus] = useState(null);
   const [showSyllabus, setShowSyllabus] = useState(false);
+  const [loadingSyllabus, setLoadingSyllabus] = useState(false);
 
   useEffect(() => {
     if (classroomCode) {
@@ -83,6 +84,7 @@ function ClassroomPage() {
   };
 
   const handleShowSyllabus = async () => {
+    setLoadingSyllabus(true);
     try {
       const response = await axios.get(
         `/api/syllabus?classroomCode=${classroomCode}`
@@ -94,6 +96,8 @@ function ClassroomPage() {
     } catch (error) {
       console.error("Error fetching syllabus:", error);
       toast("Failed to fetch syllabus. Please try again.");
+    } finally {
+      setLoadingSyllabus(false);
     }
   };
   useEffect(() => {
@@ -218,7 +222,35 @@ function ClassroomPage() {
           onClick={handleShowSyllabus}
           className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all w-fit mx-auto cursor-pointer"
         >
-          {showSyllabus ? "Hide Syllabus" : "Show Syllabus"}
+          {loadingSyllabus ? (
+            <div className="flex items-center space-x-2 cursor-not-allowed">
+              <svg
+                className="animate-spin h-6 w-6 text-purple-200"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M12 2a10 10 0 0 1 10 10H12V2z"
+                />
+              </svg>
+              <span className="text-purple-100 font-semibold">Loading...</span>
+            </div>
+          ) : showSyllabus ? (
+            "Hide Syllabus"
+          ) : (
+            "Show Syllabus"
+          )}
         </motion.button>
 
         {showSyllabus && (
