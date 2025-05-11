@@ -65,9 +65,7 @@ export async function POST(req) {
 
     // Check for student role
     if (user.role === "student") {
-      const student = await Student.findOne({ userId: user.id }).populate(
-        "classrooms"
-      );
+      const student = await Student.findOne({ userId: user.id });
       if (!student) {
         return NextResponse.json(
           { success: false, message: "Student not found" },

@@ -30,6 +30,9 @@ export async function middleware(request) {
   if (token && role === "teacher" && url.pathname.startsWith("/dashboard")) {
     return NextResponse.redirect(new URL("/teacher", request.url));
   }
+  if (token && role === "student" && url.pathname.startsWith("/dashboard")) {
+    return NextResponse.redirect(new URL("/student", request.url));
+  }
 
   if (
     token &&
