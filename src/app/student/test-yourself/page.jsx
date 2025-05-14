@@ -3,10 +3,16 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Brain, Clock, CheckCircle2, XCircle, BookOpen } from "lucide-react";
+import axios from "axios";
+import { useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 
 const StudentPage = () => {
-  const [syllabuses, setSyllabuses] = useState([]);
-  const [selectedSyllabus, setSelectedSyllabus] = useState(null);
+  const [syllabuses, setSyllabuses] = useState();
+  const searchParams = useSearchParams();
+  const classroomCode = searchParams.get("classroomCode");
+  console.log("Classroom Code: ", classroomCode);
+
   const [selectedChapter, setSelectedChapter] = useState(null);
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [quiz, setQuiz] = useState(null);
@@ -17,10 +23,6 @@ const StudentPage = () => {
   const [loadingType, setLoadingType] = useState(null);
   const [error, setError] = useState(null);
   const [results, setResults] = useState(null);
-
-  useEffect(() => {
-    fetchSyllabuses();
-  }, []);
 
   useEffect(() => {
     if (quiz && !results) {
@@ -40,14 +42,24 @@ const StudentPage = () => {
 
   const fetchSyllabuses = async () => {
     try {
-      const response = await fetch("/api/syllabus");
-      const data = await response.json();
-      setSyllabuses(data);
+      const response = await axios.get(
+        `/api/syllabus?classroomCode=${classroomCode}`
+      );
+
+      console.log(response);
+      if (response) {
+        setSyllabuses(response.data);
+        console.log(response.data);
+      }
     } catch (error) {
-      console.error("Error fetching syllabuses:", error);
-      setError("Failed to fetch syllabuses");
+      console.error("Error fetching syllabus:", error);
+      toast("Failed to fetch syllabus. Please try again.");
     }
   };
+
+  useEffect(() => {
+    fetchSyllabuses();
+  }, []);
 
   const generateQuiz = async (type, content) => {
     try {
@@ -55,20 +67,14 @@ const StudentPage = () => {
       setLoadingType(type);
       setError(null);
 
-      const response = await fetch("/api/quiz/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ content }),
-      });
+      const response = await axios.post(
+        `/api/quiz/generate?classroomCode=${classroomCode}`,
+        { content }
+      );
 
-      if (!response.ok) {
-        throw new Error("Failed to generate quiz");
-      }
-
-      const questions = await response.json();
+      const questions = await response.data;
       setQuiz(questions);
+      console.log(quiz);
       setTimeLeft(600);
       setAnswers({});
       setScore(null);
@@ -143,35 +149,16 @@ const StudentPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <select
                 className="w-full p-3 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
-                onChange={(e) => setSelectedSyllabus(e.target.value)}
-                value={selectedSyllabus || ""}
+                onChange={(e) => setSelectedChapter(e.target.value)}
+                value={selectedChapter || ""}
               >
-                <option value="" className="text-gray-800">
-                  Select Syllabus
-                </option>
-                {syllabuses.map((s) => (
-                  <option key={s._id} value={s._id} className="text-gray-800">
-                    {s.syllabusSubject}
+                <option value="">Select Chapter</option>
+                {syllabuses?.chapters.map((chapter, index) => (
+                  <option key={index} value={index}>
+                    {chapter.chapterName}
                   </option>
                 ))}
               </select>
-
-              {selectedSyllabus && (
-                <select
-                  className="w-full p-3 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
-                  onChange={(e) => setSelectedChapter(e.target.value)}
-                  value={selectedChapter || ""}
-                >
-                  <option value="">Select Chapter</option>
-                  {syllabuses
-                    .find((s) => s._id === selectedSyllabus)
-                    ?.chapters.map((chapter, index) => (
-                      <option key={index} value={index}>
-                        {chapter.chapterName}
-                      </option>
-                    ))}
-                </select>
-              )}
 
               {selectedChapter !== null && (
                 <select
@@ -180,13 +167,13 @@ const StudentPage = () => {
                   value={selectedTopic || ""}
                 >
                   <option value="">Select Topic</option>
-                  {syllabuses
-                    .find((s) => s._id === selectedSyllabus)
-                    ?.chapters[selectedChapter].topics.map((topic, index) => (
+                  {syllabuses?.chapters[selectedChapter].topics.map(
+                    (topic, index) => (
                       <option key={index} value={topic}>
                         {topic}
                       </option>
-                    ))}
+                    )
+                  )}
                 </select>
               )}
             </div>
@@ -200,13 +187,7 @@ const StudentPage = () => {
                   onClick={() =>
                     generateQuiz(
                       "topic",
-                      `the topic "${selectedTopic}" from chapter "${
-                        syllabuses.find((s) => s._id === selectedSyllabus)
-                          ?.chapters[selectedChapter].chapterName
-                      }" of ${
-                        syllabuses.find((s) => s._id === selectedSyllabus)
-                          ?.syllabusSubject
-                      }`
+                      `the topic "${selectedTopic}" from chapter "${syllabuses?.chapters[selectedChapter].chapterName}" of ${syllabuses?.syllabusSubject}`
                     )
                   }
                   disabled={loading}
@@ -252,13 +233,7 @@ const StudentPage = () => {
                   onClick={() =>
                     generateQuiz(
                       "chapter",
-                      `the chapter "${
-                        syllabuses.find((s) => s._id === selectedSyllabus)
-                          ?.chapters[selectedChapter].chapterName
-                      }" of ${
-                        syllabuses.find((s) => s._id === selectedSyllabus)
-                          ?.syllabusSubject
-                      }`
+                      `the chapter "${syllabuses?.chapters[selectedChapter].chapterName}" of ${syllabuses?.syllabusSubject}`
                     )
                   }
                   disabled={loading}
@@ -296,54 +271,49 @@ const StudentPage = () => {
                 </motion.button>
               )}
 
-              {selectedSyllabus && (
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                  onClick={() =>
-                    generateQuiz(
-                      "syllabus",
-                      `the complete syllabus of ${
-                        syllabuses.find((s) => s._id === selectedSyllabus)
-                          ?.syllabusSubject
-                      }`
-                    )
-                  }
-                  disabled={loading}
-                >
-                  {loading && loadingType === "syllabus" ? (
-                    <>
-                      <svg
-                        className="animate-spin h-5 w-5 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                      <span>Generating...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Brain className="h-5 w-5" />
-                      Generate Quiz for Complete Syllabus
-                    </>
-                  )}
-                </motion.button>
-              )}
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                onClick={() =>
+                  generateQuiz(
+                    "syllabus",
+                    `the complete syllabus of ${syllabuses?.syllabusSubject}`
+                  )
+                }
+                disabled={loading}
+              >
+                {loading && loadingType === "syllabus" ? (
+                  <>
+                    <svg
+                      className="animate-spin h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    <span>Generating...</span>
+                  </>
+                ) : (
+                  <>
+                    <Brain className="h-5 w-5" />
+                    Generate Quiz for Complete Syllabus
+                  </>
+                )}
+              </motion.button>
             </div>
           </motion.div>
         ) : (
