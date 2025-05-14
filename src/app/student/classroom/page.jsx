@@ -1,19 +1,23 @@
+"use client";
 import React from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { BarChart3 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 function Page() {
+  const searchParams = useSearchParams();
+  const classroomCode = searchParams.get("classroomCode");
   const options = [
     {
       title: "View Syllabus",
-      link: "/syllabus",
+      link: `/classroom/syllabus?classroomCode=${classroomCode}`,
     },
     {
       title: "Test Yourself",
-      link: "/test-yourself",
+      link: `/test-yourself?classroomCode=${classroomCode}`,
     },
     {
       title: "View Assignments",
@@ -52,7 +56,7 @@ function Page() {
                 {/* You can modify this text based on your needs */}
                 Click to view {option.title}.
               </p>
-              <Link href={option.link}>
+              <Link href={`/student/${option.link}`}>
                 <Button className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all">
                   Go to {option.title}
                 </Button>
