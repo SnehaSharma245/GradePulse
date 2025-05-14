@@ -5,6 +5,7 @@ import dbConnect from "@/lib/dbConnect";
 import Classroom from "@/models/classroom.model";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/options";
+import Teacher from "@/models/teacher.model";
 
 export async function POST(req) {
   try {
@@ -34,9 +35,10 @@ export async function POST(req) {
         { status: 401 }
       );
 
+    const teacher = await Teacher.findOne({ userId: user.id });
     const classroom = await Classroom.findOne({
       classroomCode: classroomCode,
-      teacher: user.id,
+      teacher: teacher._id,
     });
 
     if (!file) {
