@@ -74,7 +74,7 @@ function StudentClassrooms() {
                 </p>
                 <p className="text-purple-700">
                   <span className="font-semibold">Teacher:</span>{" "}
-                  {classroom.teacherName || "Unknown"}
+                  {classroom.teacher.teacherName || "Unknown"}
                 </p>
                 <Link
                   href={`/student/classroom/?classroomCode=${classroom.classroomCode}`}
