@@ -43,7 +43,7 @@ export async function POST(req) {
 
       const classroom = await Classroom.findOne({
         classroomCode: classroomCode,
-        teacher: user.id,
+        teacher: teacher._id,
       });
 
       if (!classroom) {
