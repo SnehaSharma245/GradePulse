@@ -29,7 +29,7 @@ export async function POST(req) {
       }
 
       const classrooms = await Classroom.find({
-        teacher: user.id,
+        teacher: teacher._id,
       });
 
       if (!classrooms) {
@@ -50,9 +50,13 @@ export async function POST(req) {
     }
 
     if (user.role === "student") {
-      const student = await Student.findOne({ userId: user.id }).populate(
-        "classrooms"
-      );
+      const student = await Student.findOne({ userId: user.id }).populate({
+        path: "classrooms",
+        populate: {
+          path: "teacher", // Populate the `teacher` field in classrooms
+          model: "Teacher", // Ensure this matches your Teacher model
+        },
+      });
       if (!student) {
         return NextResponse.json(
           { success: false, message: "Student not found" },
@@ -60,6 +64,7 @@ export async function POST(req) {
         );
       }
       const classrooms = student.classrooms;
+
       if (!classrooms || classrooms.length === 0) {
         return NextResponse.json(
           { success: false, message: "No classrooms found" },
